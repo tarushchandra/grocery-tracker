@@ -34,7 +34,10 @@ const KEYS = {
   PURCHASES: '@grocery_purchases',
   COMMON_ITEMS: '@grocery_common_items',
   SETTINGS: '@grocery_settings',
+  LAST_CLEANUP: '@grocery_last_cleanup',
 };
+
+const DATA_RETENTION_MONTHS = 4;
 
 function generateId(): string {
   return Crypto.randomUUID();
@@ -50,7 +53,44 @@ function getMonthString(date?: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
+function getCutoffDate(): Date {
+  const now = new Date();
+  now.setMonth(now.getMonth() - DATA_RETENTION_MONTHS);
+  now.setDate(1);
+  now.setHours(0, 0, 0, 0);
+  return now;
+}
+
 export const storage = {
+  async cleanupOldData(): Promise<void> {
+    const lastCleanup = await AsyncStorage.getItem(KEYS.LAST_CLEANUP);
+    const today = getTodayString();
+
+    if (lastCleanup === today) return;
+
+    const cutoff = getCutoffDate().toISOString();
+
+    const [depositsRaw, purchasesRaw] = await Promise.all([
+      AsyncStorage.getItem(KEYS.DEPOSITS),
+      AsyncStorage.getItem(KEYS.PURCHASES),
+    ]);
+
+    const deposits: Deposit[] = depositsRaw ? JSON.parse(depositsRaw) : [];
+    const purchases: Purchase[] = purchasesRaw ? JSON.parse(purchasesRaw) : [];
+
+    const filteredDeposits = deposits.filter(d => d.date >= cutoff);
+    const filteredPurchases = purchases.filter(p => p.date >= cutoff);
+
+    const depositsChanged = filteredDeposits.length !== deposits.length;
+    const purchasesChanged = filteredPurchases.length !== purchases.length;
+
+    const updates: [string, string][] = [[KEYS.LAST_CLEANUP, today]];
+    if (depositsChanged) updates.push([KEYS.DEPOSITS, JSON.stringify(filteredDeposits)]);
+    if (purchasesChanged) updates.push([KEYS.PURCHASES, JSON.stringify(filteredPurchases)]);
+
+    await AsyncStorage.multiSet(updates);
+  },
+
   async getDeposits(): Promise<Deposit[]> {
     const data = await AsyncStorage.getItem(KEYS.DEPOSITS);
     return data ? JSON.parse(data) : [];
@@ -173,22 +213,6 @@ export const storage = {
     await AsyncStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
   },
 
-  async getTotalDeposits(): Promise<number> {
-    const deposits = await this.getDeposits();
-    return deposits.reduce((sum, d) => sum + d.amount, 0);
-  },
-
-  async getTotalPurchases(): Promise<number> {
-    const purchases = await this.getPurchases();
-    return purchases.reduce((sum, p) => sum + p.totalPrice, 0);
-  },
-
-  async getBalance(): Promise<number> {
-    const totalDeposits = await this.getTotalDeposits();
-    const totalPurchases = await this.getTotalPurchases();
-    return totalDeposits - totalPurchases;
-  },
-
   async exportData(): Promise<string> {
     const deposits = await this.getDeposits();
     const purchases = await this.getPurchases();
@@ -206,7 +230,7 @@ export const storage = {
   },
 
   async clearAllData(): Promise<void> {
-    await AsyncStorage.multiRemove([KEYS.DEPOSITS, KEYS.PURCHASES, KEYS.COMMON_ITEMS, KEYS.SETTINGS]);
+    await AsyncStorage.multiRemove([KEYS.DEPOSITS, KEYS.PURCHASES, KEYS.COMMON_ITEMS, KEYS.SETTINGS, KEYS.LAST_CLEANUP]);
   },
 
   getTodayString,

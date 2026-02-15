@@ -1,20 +1,27 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+export interface Deposit {
+  id: string;
+  amount: number;
+  date: string;
+  note: string;
+}
 
-export const users = pgTable("users", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
+export interface Purchase {
+  id: string;
+  itemName: string;
+  price: number;
+  quantity: number;
+  totalPrice: number;
+  date: string;
+}
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
+export interface CommonItem {
+  id: string;
+  name: string;
+  defaultPrice: number;
+}
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export interface AppSettings {
+  darkMode: boolean | null;
+  currency: string;
+  monthlyBudget: number;
+}

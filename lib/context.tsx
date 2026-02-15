@@ -23,7 +23,6 @@ interface AppContextValue {
   updateSettings: (settings: Partial<AppSettings>) => Promise<void>;
   refreshData: () => Promise<void>;
   formatCurrency: (amount: number) => string;
-  getMonthPurchases: (month?: string) => Promise<Purchase[]>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -40,6 +39,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const refreshData = useCallback(async () => {
     try {
+      await storage.cleanupOldData();
+
       const [deps, purs, items, sett] = await Promise.all([
         storage.getDeposits(),
         storage.getPurchases(),
@@ -147,10 +148,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await storage.saveSettings(newSettings);
   }, [settings]);
 
-  const getMonthPurchases = useCallback(async (month?: string) => {
-    return storage.getMonthPurchases(month);
-  }, []);
-
   const value = useMemo(() => ({
     deposits,
     purchases,
@@ -172,8 +169,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     updateSettings,
     refreshData,
     formatCurrency,
-    getMonthPurchases,
-  }), [deposits, purchases, todayPurchases, commonItems, settings, balance, todayTotal, monthTotal, isLoading, isDark, addDeposit, deleteDeposit, addPurchase, deletePurchase, addCommonItem, updateCommonItem, deleteCommonItem, updateSettings, refreshData, formatCurrency, getMonthPurchases]);
+  }), [deposits, purchases, todayPurchases, commonItems, settings, balance, todayTotal, monthTotal, isLoading, isDark, addDeposit, deleteDeposit, addPurchase, deletePurchase, addCommonItem, updateCommonItem, deleteCommonItem, updateSettings, refreshData, formatCurrency]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
