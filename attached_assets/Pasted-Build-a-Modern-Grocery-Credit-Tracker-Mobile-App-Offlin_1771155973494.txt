@@ -1,0 +1,252 @@
+Build a Modern Grocery Credit Tracker Mobile App (Offline-First)
+
+Create a mobile-first grocery credit tracker application with a modern, premium UI/UX. The app is designed for a real-world use case where a user deposits a lump sum amount (e.g., ₹500) with a local shopkeeper and makes daily purchases that get deducted from that stored balance.
+
+The app must work offline-first and store all data locally on the device.
+
+Core Use Case
+
+A user:
+
+Deposits money with a shopkeeper.
+
+Purchases groceries daily.
+
+Wants to:
+
+Track today's purchases
+
+See remaining balance stored with shopkeeper
+
+View monthly breakdown of expenses
+
+Visualize spending trends
+
+Quickly add commonly purchased items
+
+Platform & Tech Requirements
+
+Platform: Mobile App (React Native / Expo preferred)
+
+Local Storage: SQLite or secure persistent local storage (no backend)
+
+State Management: Modern approach (Zustand or Redux Toolkit)
+
+UI: Clean, minimal, smooth animations
+
+Design System: Soft shadows, rounded corners (16px+ radius), subtle gradients
+
+Dark mode support required
+
+Indian currency formatting (₹)
+
+Core Features
+1. Wallet / Balance System
+
+User can:
+
+Add deposit amount (e.g., ₹500)
+
+Add more deposits anytime
+
+App must show:
+
+Current balance stored with shopkeeper
+
+Today's purchase total
+
+Remaining balance after today's purchases
+
+Balance must auto-update after each purchase entry.
+
+2. Add Purchase Flow
+
+User can:
+
+Select from commonly purchased items
+
+Or manually add item name + price
+
+Option to:
+
+Add quantity
+
+Edit or delete today's entries
+
+Show:
+
+List of today's purchases
+
+Total for today (auto calculated)
+
+3. Common Items Library
+
+User can:
+
+Add frequently purchased items
+
+Set default price
+
+Example items:
+
+1L Milk – ₹60
+
+0.5L Milk – ₹30
+
+Bread – ₹40
+
+Quick-add button on home screen for fast entry.
+
+4. Monthly Dashboard & Analytics
+
+Create a dedicated analytics screen with:
+
+Monthly total spending
+
+Daily spending bar chart
+
+Category-wise pie chart
+
+Remaining balance trend line
+
+Top purchased items list
+
+Calendar view with daily totals
+
+Use clean chart libraries with smooth animations.
+
+5. UI/UX Requirements
+
+Make the UI feel like:
+
+Modern fintech app
+
+Smooth micro-interactions
+
+Soft neumorphism or glassmorphism touches
+
+Floating action button for adding purchases
+
+Swipe-to-delete interactions
+
+Haptic feedback on transactions
+
+Empty state illustrations
+
+Design aesthetic:
+
+Neutral background (light gray / soft beige)
+
+Primary accent color: modern green or indigo
+
+High readability typography
+
+Spacious layout
+
+Rounded cards
+
+Clean tab navigation (Home, Analytics, Items, Settings)
+
+6. Data Model (Important)
+
+Entities:
+
+Deposits
+
+id
+
+amount
+
+date
+
+Purchases
+
+id
+
+item_name
+
+price
+
+quantity
+
+total_price
+
+date
+
+CommonItems
+
+id
+
+name
+
+default_price
+
+All calculations must be derived from local storage data.
+
+7. Smart UX Enhancements
+
+Auto-calculate total price (price × quantity)
+
+Show low balance warning
+
+Monthly reset view (without deleting historical data)
+
+Export monthly report as PDF
+
+Backup & restore locally (JSON export/import)
+
+Search purchase history
+
+Filter by date range
+
+8. Settings Screen
+
+Reset month view
+
+Currency selection (default ₹)
+
+Dark / Light toggle
+
+Data export option
+
+9. Performance & Architecture
+
+Component-based modular structure
+
+Clean folder structure
+
+No unnecessary re-renders
+
+Optimized selectors
+
+Scalable state management
+
+Strict typing if using TypeScript
+
+10. Bonus (Optional but Impressive)
+
+Budget target per month
+
+Spending prediction based on current trend
+
+Animated balance counter
+
+Smart suggestion: “You usually buy milk today”
+
+Expected Output
+
+Generate:
+
+Complete folder structure
+
+Reusable components
+
+Clean, production-level code
+
+Styled components with consistent design system
+
+Functional analytics charts
+
+Smooth animations
+
+The final app must feel polished, premium, and ready for Play Store launch.
