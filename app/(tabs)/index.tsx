@@ -1,13 +1,12 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import {
   StyleSheet, Text, View, ScrollView, Pressable, Platform, Alert,
-  Animated as RNAnimated,
 } from 'react-native';
-import { Ionicons, Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useApp } from '@/lib/context';
 import Colors from '@/constants/colors';
 
@@ -92,36 +91,48 @@ function QuickAddItem({ name, price, onAdd, isDark }: { name: string; price: num
 function PurchaseRow({ item, isDark, onDelete, formatCurrency }: any) {
   const colors = isDark ? Colors.dark : Colors.light;
   return (
-    <Pressable
-      onLongPress={() => {
-        if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        Alert.alert('Delete Purchase', `Remove ${item.itemName}?`, [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Delete', style: 'destructive', onPress: () => onDelete(item.id) },
-        ]);
-      }}
-      style={[styles.purchaseRow, { borderBottomColor: colors.border }]}
-    >
+    <View style={[styles.purchaseRow, { borderBottomColor: colors.border }]}>
       <View style={[styles.purchaseDot, { backgroundColor: colors.primary }]} />
       <View style={styles.purchaseInfo}>
         <Text style={[styles.purchaseName, { color: colors.text }]}>{item.itemName}</Text>
         <Text style={[styles.purchaseQty, { color: colors.textSecondary }]}>
-          {item.quantity > 1 ? `${item.quantity} x ${formatCurrency(item.price)}` : ''}
+          {item.quantity > 1 ? `${item.quantity} x ${formatCurrency(item.price)}` : formatCurrency(item.price)}
         </Text>
       </View>
       <Text style={[styles.purchasePrice, { color: colors.text }]}>{formatCurrency(item.totalPrice)}</Text>
-    </Pressable>
+      <Pressable
+        onPress={() => {
+          if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          Alert.alert(
+            'Delete Purchase',
+            `Remove "${item.itemName}" (${formatCurrency(item.totalPrice)})?\n\nThis amount will be added back to your balance.`,
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Delete', style: 'destructive', onPress: () => onDelete(item.id) },
+            ]
+          );
+        }}
+        style={({ pressed }) => [styles.deleteBtn, { opacity: pressed ? 0.5 : 1 }]}
+      >
+        <Ionicons name="close-circle" size={20} color={colors.danger} />
+      </Pressable>
+    </View>
   );
 }
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const { isDark, todayPurchases, commonItems, addPurchase, deletePurchase, formatCurrency, monthTotal, balance } = useApp();
+  const { isDark, todayPurchases, commonItems, addPurchase, deletePurchase, formatCurrency, monthTotal } = useApp();
   const colors = isDark ? Colors.dark : Colors.light;
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   const handleQuickAdd = async (name: string, price: number) => {
     await addPurchase(name, price, 1);
+    if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  const handleDeletePurchase = async (id: string) => {
+    await deletePurchase(id);
     if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
@@ -198,8 +209,14 @@ export default function HomeScreen() {
           ) : (
             <View style={[styles.purchaseList, { backgroundColor: colors.surface }]}>
               {todayPurchases.map(p => (
-                <PurchaseRow key={p.id} item={p} isDark={isDark} onDelete={deletePurchase} formatCurrency={formatCurrency} />
+                <PurchaseRow key={p.id} item={p} isDark={isDark} onDelete={handleDeletePurchase} formatCurrency={formatCurrency} />
               ))}
+              <View style={[styles.purchaseTotalRow, { borderTopColor: colors.border }]}>
+                <Text style={[styles.purchaseTotalLabel, { color: colors.textSecondary }]}>Today's Total</Text>
+                <Text style={[styles.purchaseTotalValue, { color: colors.primary }]}>
+                  {formatCurrency(todayPurchases.reduce((s, p) => s + p.totalPrice, 0))}
+                </Text>
+              </View>
             </View>
           )}
         </Animated.View>
@@ -256,11 +273,15 @@ const styles = StyleSheet.create({
   emptyTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 16 },
   emptySubtitle: { fontFamily: 'Inter_400Regular', fontSize: 13, textAlign: 'center' },
   purchaseList: { borderRadius: 16, overflow: 'hidden' },
-  purchaseRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 0.5 },
+  purchaseRow: { flexDirection: 'row', alignItems: 'center', paddingLeft: 16, paddingRight: 8, paddingVertical: 12, borderBottomWidth: 0.5 },
   purchaseDot: { width: 8, height: 8, borderRadius: 4, marginRight: 12 },
   purchaseInfo: { flex: 1 },
   purchaseName: { fontFamily: 'Inter_500Medium', fontSize: 15 },
   purchaseQty: { fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 2 },
-  purchasePrice: { fontFamily: 'Inter_600SemiBold', fontSize: 15 },
+  purchasePrice: { fontFamily: 'Inter_600SemiBold', fontSize: 15, marginRight: 8 },
+  deleteBtn: { padding: 6 },
+  purchaseTotalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderTopWidth: 1 },
+  purchaseTotalLabel: { fontFamily: 'Inter_500Medium', fontSize: 14 },
+  purchaseTotalValue: { fontFamily: 'Inter_700Bold', fontSize: 18 },
   fab: { position: 'absolute', right: 20, width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 6 },
 });
