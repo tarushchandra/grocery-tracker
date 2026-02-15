@@ -1,12 +1,48 @@
-// template
-const tintColorLight = "#2f95dc";
-
-export default {
+const Colors = {
   light: {
-    text: "#000",
-    background: "#fff",
-    tint: tintColorLight,
-    tabIconDefault: "#ccc",
-    tabIconSelected: tintColorLight,
+    primary: '#0D9F6E',
+    primaryLight: '#E6F7F0',
+    primaryDark: '#087A54',
+    accent: '#F59E0B',
+    accentLight: '#FEF3C7',
+    background: '#F5F5F0',
+    surface: '#FFFFFF',
+    surfaceSecondary: '#F0EFEA',
+    text: '#1A1A1A',
+    textSecondary: '#6B7280',
+    textTertiary: '#9CA3AF',
+    border: '#E5E5E0',
+    danger: '#EF4444',
+    dangerLight: '#FEE2E2',
+    success: '#10B981',
+    warning: '#F59E0B',
+    tint: '#0D9F6E',
+    tabIconDefault: '#9CA3AF',
+    tabIconSelected: '#0D9F6E',
+    cardShadow: 'rgba(0,0,0,0.06)',
+  },
+  dark: {
+    primary: '#34D399',
+    primaryLight: '#064E3B',
+    primaryDark: '#6EE7B7',
+    accent: '#FBBF24',
+    accentLight: '#78350F',
+    background: '#0F0F0F',
+    surface: '#1A1A1A',
+    surfaceSecondary: '#252525',
+    text: '#F9FAFB',
+    textSecondary: '#9CA3AF',
+    textTertiary: '#6B7280',
+    border: '#2D2D2D',
+    danger: '#F87171',
+    dangerLight: '#7F1D1D',
+    success: '#34D399',
+    warning: '#FBBF24',
+    tint: '#34D399',
+    tabIconDefault: '#6B7280',
+    tabIconSelected: '#34D399',
+    cardShadow: 'rgba(0,0,0,0.3)',
   },
 };
+
+export default Colors;
